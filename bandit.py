@@ -12,7 +12,7 @@ class multiarm_bandit:
     '''
     
 
-    def __init__(self, k, epsilon, mu,  iterations, action_value_method = "weighted", alpha = None):
+    def __init__(self, k, epsilon, mu,  iterations, action_value_method = "weighted", alpha = None, stationarity = True):
         self.k = k
         self.alpha = alpha
         self.epsilon = epsilon
@@ -61,8 +61,9 @@ class multiarm_bandit:
         elif rv == 1:
             a = np.random.choice(self.k)
 
-        # sampling actual reward from respective gaussian -> N(mu_a, 1)
-        reward = np.random.normal(self.mu[a], 1)
+        if stationarity == True:
+            # sampling actual reward from respective gaussian -> N(mu_a, 1)
+            reward = np.random.normal(self.mu[a], 1)        
 
         # updating counts
         self.n += 1
