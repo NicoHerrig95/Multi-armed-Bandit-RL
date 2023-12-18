@@ -1,6 +1,6 @@
 import numpy as np 
 
-class multiarm_bandit:
+class multiarmed_bandit:
     '''
     A flexible class, producing an object which acts as a bandit problem. 
     Arguments:
