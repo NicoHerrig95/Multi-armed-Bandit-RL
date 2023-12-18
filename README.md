@@ -1,7 +1,6 @@
 # Multi-arm bandit environment and algorithms
 > This repository contains a python class for simulating the multi-arm bandit problem with implementations of the most common algorithms for action-selection, action value methods and options for process stationarity (i.e., adversarial bandits).
 > The scope of this project is to provide a comprehensive but easy-to-use environment for stochastic analysis of the problem.
-> Live demo [_here_](https://www.example.com). <!-- If you have the project hosted somewhere, include the link here. -->
 
 ## Table of Contents
 * [General Info](#general-information)
