@@ -1,4 +1,8 @@
 import numpy as np 
+import matplotlib.pyplot as plt
+
+''' 
+'''
 
 class multiarmed_bandit:
     '''
@@ -7,10 +11,13 @@ class multiarmed_bandit:
     k: number of arms/actions
     epsilon: probability of choosing non-greedy action
     iterations: number of iterations
-    mu: mean values for actual rewards, which follow a defined probability distribution
-    action_value_method: the specified method for calculating the estimated rewards
+    mu: mean values for actual rewards, which follow a defined theoretical probability distribution ["random", list of length k]
+    action_value_method: the specified method for calculating the estimated rewards ["random", "weighted"]
     alpha: step size parameter for action value method "weighted"
-    stationarity: indicates whether bandit problem shall behave stationary or non-stationary
+    stationarity: indicates whether bandit problem shall behave stationary or non-stationary ["True","False"]
+    initialisation: initial values for Q estimates ["default", "optimistic"]
+    init_values: if initialisation == "optimistic", the model requires a list (length k) of initial values for Q estimates
+    seed: integer value for random seed generation
     '''
     
 
@@ -20,11 +27,12 @@ class multiarmed_bandit:
         epsilon = 0,
         mu = "random", 
         iterations = 1000, 
-        action_value_method = "random", 
+        action_value_method = "average", 
         alpha = None, 
         stationarity = True, 
         initialisation = "default",
-        init_values = None):
+        init_values = None,
+        seed = None):
 
 
         self.k = k
@@ -52,6 +60,9 @@ class multiarmed_bandit:
         # defining method
         self.value_method = action_value_method
 
+        # table for estimare tracking
+        self.q_tracker = np.zeros((self.iters, self.k))
+
 
         # Expected values (mu) for rewards
         # if mu shall be gaussian rv, sampling mu from N(0,1)
@@ -69,6 +80,9 @@ class multiarmed_bandit:
             self.rw_increment = np.zeros(k)
         else:
             self.stationarity = True
+
+
+        self.seed = seed
 
     def trigger(self):
 
@@ -123,6 +137,9 @@ class multiarmed_bandit:
     def execute(self):
         # executing bandit for given iterations
 
+        # random seed
+        np.random.seed(self.seed)
+
         # loop over iterations/steps
         for i in range(self.iters):
             self.trigger()
@@ -130,18 +147,19 @@ class multiarmed_bandit:
             # storing results
             self.rewards[i] = self.realized_reward # storing the total realized reward in output vector
             self.rewards_avg[i] = self.mean_reward # storing the mean reward at t into corresponding storing vector
+            self.q_tracker[i] = self.q
 
         out = {
             "realized rewards":self.rewards,
             "average rewards":self.rewards_avg,
-            "q-estimates":self.q,
+            "q-estimates":self.q_tracker,
             "mu-values":self.mu,
             "action counter": self.action_n
         }
 
         return(out)
     
-    # list of all statistics - for check up 
+    # list of all statistics
     def stats(self):
 
         stats = {
@@ -163,12 +181,19 @@ class multiarmed_bandit:
 
         return stats
 
+    def tracking(self):
+        out = {
+            "test": self.q_tracker
+        }
+
+
     # envorinment reset
     def reset(self):
         self.n = 0
         self.action_n = np.zeros(self.k)
         self.mean_reward = 0 
         self.realized_reward = 0 
-        self.rewards_avg = np.zeros(iterations)
+        self.rewards_avg = np.zeros(self.iters)
         self.rewards = np.zeros(self.iters) # array for storing realized reward values
         self.q = np.zeros(self.k)
+        self.q_tracker = np.zeros((self.iters, self.k))
