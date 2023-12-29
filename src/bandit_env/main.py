@@ -199,6 +199,9 @@ class multiarmed_bandit:
             
 
     def execute(self):
+        '''
+        Executes the model and prints evaluation statistics.
+        '''
         # executing bandit for given iterations
 
         # loop over iterations/steps
@@ -218,6 +221,9 @@ class multiarmed_bandit:
 
         
     def results(self):
+        '''
+        Returns a dictionary containing all relevant results for model evaluation.
+        '''
         out = {
             "realized rewards":self.rewards,
             "average rewards":self.rewards_avg,
@@ -231,6 +237,9 @@ class multiarmed_bandit:
     
     # list of all statistics
     def stats(self):
+        '''
+        Returns a dictionary of all environment statistics.
+        '''
 
         stats = {
             "realized rewards":self.rewards,
@@ -254,6 +263,9 @@ class multiarmed_bandit:
 
     # envorinment reset
     def reset(self):
+        '''
+        Resets the environment.
+        '''
         self.n = 0
         self.action_n = np.zeros(self.k)
         self.mean_reward = 0 
