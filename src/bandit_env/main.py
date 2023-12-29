@@ -144,6 +144,7 @@ class multiarmed_bandit:
         self.realized_regret = None
         self.mean_regret = 0
         self.regrets = np.zeros(iterations)
+        self.regrets_avg = np.zeros(iterations)
 
     
 
@@ -176,11 +177,15 @@ class multiarmed_bandit:
         if self.stationarity == True:
             # sampling actual reward from respective gaussian -> N(mu_a, 1)
             self.realized_reward = np.random.normal(self.mu[a], 1)
+            # calculating random regret 
+            self.realized_regret = max(mu) - self.realized_reward
 
         if self.stationarity == False:
             # adding random term to increment vector for random walk simulation
             self.rw_increment += np.random.normal(0,0.1, size = self.k) 
             self.realized_reward = np.random.normal(self.mu[a], 1) + self.rw_increment[a]
+            # calculating random regret 
+            self.realized_regret = max(self.mu) - self.realized_reward
 
         # UPDATING ACTION COUNTS
         self.n += 1 
@@ -188,6 +193,10 @@ class multiarmed_bandit:
 
         # calculating and updating mean reward
         self.mean_reward = self.mean_reward + (1/self.n) * (self.realized_reward - self.mean_reward)
+
+        # calculating mean regret
+        self.mean_regret = self.mean_regret + (1/self.n) * (self.realized_regret - self.mean_regret)
+       
 
         # ACTION SELECTION VALUE UPDATE / Q ESTIMATES
         # sample-average method (for stationary case)
@@ -199,9 +208,6 @@ class multiarmed_bandit:
             
 
     def execute(self):
-        '''
-        Executes the model and prints evaluation statistics.
-        '''
         # executing bandit for given iterations
 
         # loop over iterations/steps
@@ -211,22 +217,25 @@ class multiarmed_bandit:
             # storing results
             self.rewards[i] = self.realized_reward # storing the total realized reward in output vector
             self.rewards_avg[i] = self.mean_reward # storing the mean reward at t into corresponding storing vector
+            self.regrets[i] = self.realized_regret
+            self.regrets_avg[i] = self.mean_regret
             self.q_tracker[i] = self.q
 
             out = {
                 "iteration ": self.n,
-                "average reward: ": self.mean_reward}
+                "average reward": self.mean_reward,
+                "average regret": self.mean_regret
+                }
 
             print(out)
 
         
     def results(self):
-        '''
-        Returns a dictionary containing all relevant results for model evaluation.
-        '''
         out = {
             "realized rewards":self.rewards,
             "average rewards":self.rewards_avg,
+            "realized regrets":self.regrets,
+            "average regrets":self.regrets_avg,
             "q-estimates":self.q_tracker,
             "mu-values":self.mu,
             "action counter": self.action_n
@@ -237,9 +246,6 @@ class multiarmed_bandit:
     
     # list of all statistics
     def stats(self):
-        '''
-        Returns a dictionary of all environment statistics.
-        '''
 
         stats = {
             "realized rewards":self.rewards,
@@ -263,9 +269,6 @@ class multiarmed_bandit:
 
     # envorinment reset
     def reset(self):
-        '''
-        Resets the environment.
-        '''
         self.n = 0
         self.action_n = np.zeros(self.k)
         self.mean_reward = 0 
