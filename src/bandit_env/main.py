@@ -9,6 +9,7 @@ class multiarmed_bandit:
     --------------------------------------------------------------------- 
     Arguments:
     k: number of arms/actions
+    action_selection: method for selecting respective action to be executed ["epsilon_greedy", "UCB"]
     epsilon: probability of choosing non-greedy action
     iterations: number of iterations
     mu: mean values for actual rewards, which follow a defined theoretical probability distribution ["random", list of length k]
@@ -43,7 +44,7 @@ class multiarmed_bandit:
         self.k = k
 
         # Action Selection Method
-        action_selection_options = ["epsilon_greedy"]
+        action_selection_options = ["epsilon_greedy", "UCB"]
         if action_selection not in action_selection_options:
             raise ValueError("value for action_selection must be one of: {}".format(action_selection_options))
         self.action_selection = action_selection
@@ -158,18 +159,22 @@ class multiarmed_bandit:
 
 
         # ACTION SELECTION
-        # first iteration
-        if self.n == 0:
-            # randomly selects integer from array[0,...,k-1] with unit probability
-            a = np.random.choice(self.k)
         
-        # choosing greedy action if rv = 0
-        elif rv == 0:
-            a = np.argmax(self.q)
 
-        # choosing non-greedy action of rv = 1
-        elif rv == 1:
-            a = np.random.choice(self.k)
+        # Epsilon Greedy
+        if self.action_selection == "epsilon_greedy":
+            # n = 0
+            if self.n == 0:
+                # randomly selects integer from array[0,...,k-1] with unit probability
+                a = np.random.choice(self.k)
+            
+            # n > 1 
+            # choosing greedy action if rv = 0
+            elif rv == 0:
+                a = np.argmax(self.q)
+            # choosing non-greedy action of rv = 1
+            elif rv == 1:
+                a = np.random.choice(self.k)
 
 
 
@@ -178,7 +183,7 @@ class multiarmed_bandit:
             # sampling actual reward from respective gaussian -> N(mu_a, 1)
             self.realized_reward = np.random.normal(self.mu[a], 1)
             # calculating random regret 
-            self.realized_regret = max(mu) - self.realized_reward
+            self.realized_regret = max(self.mu) - self.realized_reward
 
         if self.stationarity == False:
             # adding random term to increment vector for random walk simulation
@@ -198,7 +203,7 @@ class multiarmed_bandit:
         self.mean_regret = self.mean_regret + (1/self.n) * (self.realized_regret - self.mean_regret)
        
 
-        # ACTION SELECTION VALUE UPDATE / Q ESTIMATES
+        # VALUE UPDATE / Q ESTIMATES
         # sample-average method (for stationary case)
         if self.value_method == "average":
             self.q[a] = self.q[a] + (1/self.action_n[a]) * (self.realized_reward - self.q[a])
