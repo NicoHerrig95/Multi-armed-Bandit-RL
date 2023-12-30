@@ -27,6 +27,7 @@ class multiarmed_bandit:
         k = 10,
         action_selection = "epsilon_greedy",
         epsilon = 0,
+        UCB_constant = 2,
         mu = "random", 
         iterations = 1000, 
         action_value_method = "average", 
@@ -48,12 +49,22 @@ class multiarmed_bandit:
         if action_selection not in action_selection_options:
             raise ValueError("value for action_selection must be one of: {}".format(action_selection_options))
         self.action_selection = action_selection
+
+        # table for storing upper confidenceb bounds
+        if action_selection == "UCB":
+            self.UCB_table = np.zeros(k)
         
         # Epsilon
         if not isinstance(epsilon, (int, float, complex)) or isinstance(epsilon, bool):
             raise ValueError("epsilon must be numeric")
         if epsilon > 1 or epsilon < 0: raise ValueError("epsilon must be in [0,1]")
         self.epsilon = epsilon
+
+        # UCB Constanst
+        if not isinstance(UCB_constant, (int, float, complex)) or isinstance(UCB_constant, bool):
+            raise ValueError("UCB constant must be numeric")
+        if UCB_constant <= 0: raise ValueError("UCB constant must be greater than 0")
+        self.c = UCB_constant
 
         # Alpha
         if alpha is not None:
@@ -123,10 +134,10 @@ class multiarmed_bandit:
             self.stationarity = True
 
 
-        # counter 
+        # iteration counter 
         self.n = 0 # initial step count
-        self.action_n = np.zeros(k) # initial count for executing each of k actions/pulling arms
-
+        # initial count for executing each of k actions/pulling arms
+        self.action_n = np.full(k, 10e-8) # small float for avoiding division by 0 in UCB calculation
         # tracker
         self.q_tracker = np.zeros(shape=(self.iters, self.k)) # table for estimare tracking
         self.mu_tracker = np.zeros(shape=(self.iters, self.k))
@@ -151,18 +162,15 @@ class multiarmed_bandit:
 
     def trigger(self):
 
-        # generating a rv from binomial distribution with
-        # P(rv = 1) = epsilon
-        # rv=1 -> non-greedy execution
-        # rv=0 -> greedy execution
-        rv = np.random.binomial(1, self.epsilon, 1)
-
-
         # ACTION SELECTION
-        
-
         # Epsilon Greedy
         if self.action_selection == "epsilon_greedy":
+
+            # generating a rv from binomial distribution with
+            # P(rv = 1) = epsilon
+            # rv=1 -> non-greedy execution
+            # rv=0 -> greedy execution
+            rv = np.random.binomial(1, self.epsilon, 1)
             # n = 0
             if self.n == 0:
                 # randomly selects integer from array[0,...,k-1] with unit probability
@@ -175,6 +183,23 @@ class multiarmed_bandit:
             # choosing non-greedy action of rv = 1
             elif rv == 1:
                 a = np.random.choice(self.k)
+
+
+
+
+
+        # Upper Confidence Bound
+        if self.action_selection == "UCB":
+            if self.n == 0:
+                # randomly selects integer from array[0,...,k-1] with unit probability
+                a = np.random.choice(self.k)
+
+            elif self.n >= 1:
+                self.UCB_table = self.q + self.c * np.sqrt(np.log(self.n) / self.action_n)
+                a = np.argmax(self.UCB_table)
+
+
+
 
 
 
@@ -243,7 +268,7 @@ class multiarmed_bandit:
             "average regrets":self.regrets_avg,
             "q-estimates":self.q_tracker,
             "mu-values":self.mu,
-            "action counter": self.action_n
+            "action counter": self.action_n.astype(int)
         }
 
         return(out)
@@ -266,7 +291,7 @@ class multiarmed_bandit:
             "epsilon": self.epsilon,
             "iterations": self.iters,
             "step count": self.n,
-            "action count":self.action_n
+            "action count":self.action_n.astype(int)
         }
 
         return stats
@@ -275,7 +300,7 @@ class multiarmed_bandit:
     # envorinment reset
     def reset(self):
         self.n = 0
-        self.action_n = np.zeros(self.k)
+        self.action_n = np.full(self.k, 10e-8)
         self.mean_reward = 0 
         self.realized_reward = 0 
         self.rewards_avg = np.zeros(self.iters)
