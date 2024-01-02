@@ -162,7 +162,7 @@ class multiarmed_bandit:
 
     def trigger(self):
 
-        # ACTION SELECTION
+        ##### ACTION SELECTION #####
         # Epsilon Greedy
         if self.action_selection == "epsilon_greedy":
 
@@ -203,7 +203,7 @@ class multiarmed_bandit:
 
 
 
-        # REALIZED REWARD
+        ###### REALIZED REWARD ######
         if self.stationarity == True:
             # sampling actual reward from respective gaussian -> N(mu_a, 1)
             self.realized_reward = np.random.normal(self.mu[a], 1)
@@ -217,7 +217,7 @@ class multiarmed_bandit:
             # calculating random regret 
             self.realized_regret = max(self.mu) - self.realized_reward
 
-        # UPDATING ACTION COUNTS
+        ###### UPDATING ACTION COUNTS ######
         self.n += 1 
         self.action_n[a] += 1
 
@@ -228,7 +228,7 @@ class multiarmed_bandit:
         self.mean_regret = self.mean_regret + (1/self.n) * (self.realized_regret - self.mean_regret)
        
 
-        # VALUE UPDATE / Q ESTIMATES
+        ###### VALUE UPDATE / Q ESTIMATES ######
         # sample-average method (for stationary case)
         if self.value_method == "average":
             self.q[a] = self.q[a] + (1/self.action_n[a]) * (self.realized_reward - self.q[a])
