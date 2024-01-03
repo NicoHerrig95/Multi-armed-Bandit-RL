@@ -7,7 +7,7 @@ class stochastic_bandit(gym.Env):
     The stochastic bandit problem.
 
     Attributes:
-    TBC
+    size: number of bandit arms 
     """
     def __init__(self, size, reward_distribution = "gaussian"):
 
@@ -19,7 +19,7 @@ class stochastic_bandit(gym.Env):
 
         # defining a vector (length k) of central values / expected values from a distribution 
         if reward_distribution == "gaussian":
-            self.mu = np.random.normal(self.k, 1, size = self.k)
+            self.mu = np.random.normal(0, 1, size = self.k)
  
 
     def step(self, action):
