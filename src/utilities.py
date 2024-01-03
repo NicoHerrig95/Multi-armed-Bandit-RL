@@ -69,13 +69,12 @@ class base_class_bandit(object):
         '''
         Function for selecting an action. Method is dependent on implemented bandit algorithm.
         '''
-    
         pass
 
 
     def greedy_action(self): 
         '''
-        selects action with highest q-estimate (greedy action)
+        Selects action with highest q-estimate (greedy action).
         '''
 
         greedy_table = []
@@ -88,7 +87,7 @@ class base_class_bandit(object):
 
     def random_action(self):
         '''
-        selects random action
+        selects random action.
         '''
 
         # selects an action randomly
@@ -99,7 +98,15 @@ class base_class_bandit(object):
 
     def update_estimates(self, reward, action, method = "average", alpha = None):
         '''
-        Update function for q-estimates
+        Updates the Q-estimates based on the received reward and the action taken.
+
+        Arguments:
+        ----------
+        reward: Reward received from the environment.
+        action: Action taken for receiving the reward.
+        method: Value-estimation method used for calculating Q-estimates. Must be one of ["average", "weighted"]
+        alpha: Requried when method == "weighted". Scales the weighting for the last reward. 
+               Must be within [0,1]. Type -> [int, float, complex]
         '''
 
         method_options = ["average", "weighted"]
@@ -126,9 +133,47 @@ class base_class_bandit(object):
             self.actions[action].q = self.actions[action].q + alpha * (reward - self.actions[action].q)
 
 
+    def statistics(self):
+        action_counts = []
+        for i in range(self.k): action_counts.append(self.actions[i].n)
+
+        estimates = []
+        for i in range(self.k): estimates.append(self.actions[i].q)
+
+        out = {
+            "action counts" : action_counts,
+            "Q-estimates" : estimates
+        }
+
+        return out
 
 
+    def reset(self):
+        ''' 
+        resets the agent
+        '''
+        self.actions = [] 
+        for _ in range(self.k): 
+            self.actions.append(Action(initial_value = self.initial_value))
+
+
+
+
+
+
+
+
+##### Evaluation Class ##### 
 class Multiarmed_Bandit(object):
+    '''
+    Multiarmed Bandit object. 
+    Requires a bandit environment and a bandit agent as input.
+    
+    Arguments:
+    ----------
+    environment: An initialised bandit environment 
+    agent: An initialised bandit agent
+    '''
 
     def __init__(
         self, 
@@ -140,20 +185,30 @@ class Multiarmed_Bandit(object):
 
         # getting variables from agent and environment
         self.env_mu = environment.mu
-        self.k = environment.K
+        self.k = environment.k
         
 
     def execute(self, episodes, value_estimation = "average"):
+        '''
+        Executes the Multiarmed Bandit. 
 
+        Arguments:
+        ----------
+        episodes: Number of episodes the agent is trained on the environment. Type -> [int]
+        value_estimation: Method for q-value estimation. Must be one of ["average", "weighted"]
+        '''
 
         # requires calling following functions from agent:
         # agent.step()
         # agent.select_action()
         # agent.update_estimates()
+
+        if not isinstance(episodes, int):
+            raise ValueError("episodes must be of type int")
+
         value_estimation_options = ["average", "weighted"]
         if value_estimation not in value_estimation_options:
              raise ValueError("value_estimation must be one of: {}".format(value_estimation_options))
-        self.value_estimation = value_estimation
 
         # storers
         rewards = []
@@ -166,13 +221,13 @@ class Multiarmed_Bandit(object):
 
         for _ in range(episodes):
 
-            n += 1
+            n += 1 # episode count update
 
             a = self.agent.select_action()
             reward, regret = self.env.step(action = a)
             print("action:", a, "reward: ", reward, "regret:", regret)
             # update q-estimates
-            self.agent.update_estimates(reward = reward, action=a, method = self.value_estimation)
+            self.agent.update_estimates(reward = reward, action=a, method = value_estimation)
 
 
             rewards.append(reward)
@@ -195,17 +250,77 @@ class Multiarmed_Bandit(object):
 
     ##### VISUALISATION FUNCTIONS #####
     def average_rewards(self, plot = False):
+        '''
+        Returns either a list or a plot of average rewards over time.
 
-        if plot == False: return self.results['avg rewards']
+        Arguments:
+        ----------
+        plot: Indicates whether or not average rewards are plotted. Type -> bool
+        '''
 
-        if plot == True:
+        if not isinstance(plot, bool):
+            raise ValueError("plot must be one of [True, False]")
+
+        if plot == False: 
+            return self.results['avg rewards']
+        else: 
+            # working on plot
             plt.plot(self.results['avg rewards'])
+            plt.show()
+
+    def average_regrets(self, plot = False):
+        '''
+        Returns either a list or a plot of average regrets over time.
+
+        Arguments:
+        ----------
+        plot: Indicates whether or not average rewards are plotted. Type -> bool
+        '''
+
+        if not isinstance(plot, bool):
+            raise ValueError("plot must be one of [True, False]")
+
+        if plot == False: 
+            return self.results['avg regrets']
+        else:
+            plt.plot(self.results['avg regrets'])
             plt.show()
 
 
     def selected_actions(self, plot = False):
+        '''
+        Returns either a list or a plot of selected action for current bandit execution.
 
-        out = []
-        for i in range(self.k): out.append(self.agent.actions[i].n)
+        Arguments:
+        ----------
+        plot: Indicates whether or not average rewards are plotted. Type -> bool
+        '''
 
-        if plot == False: return out     
+        if not isinstance(plot, bool):
+            raise ValueError("plot must be one of [True, False]")
+
+
+        counts = self.agent.statistics()['action counts']
+
+        if plot == False: 
+            return counts
+
+        if plot == True:
+
+            fig, ax = plt.subplots()
+            actions = [str(i+1) for i in (list(range(len(counts))))]
+            ax.bar(actions, counts)
+
+            ax.set_ylabel('total count')
+            ax.set_xlabel("action")
+            ax.set_title('action counts')
+            plt.show()
+
+
+
+    def return_agent(self):
+        ''' 
+        Returns the agent of the Bandit object.
+        '''
+
+        return self.agent
