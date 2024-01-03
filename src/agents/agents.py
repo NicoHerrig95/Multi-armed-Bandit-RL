@@ -20,9 +20,7 @@ class RandomAgent(base_class_bandit):
         super().__init__(env, q_initialisation, name) # init from base_class_bandit
 
     def select_action(self):
-
         a = super().random_action()
-
         return a  
 
 

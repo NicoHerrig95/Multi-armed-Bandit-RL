@@ -145,6 +145,11 @@ class Multiarmed_Bandit(object):
 
     def execute(self, episodes, value_estimation = "average"):
 
+
+        # requires calling following functions from agent:
+        # agent.step()
+        # agent.select_action()
+        # agent.update_estimates()
         value_estimation_options = ["average", "weighted"]
         if value_estimation not in value_estimation_options:
              raise ValueError("value_estimation must be one of: {}".format(value_estimation_options))
