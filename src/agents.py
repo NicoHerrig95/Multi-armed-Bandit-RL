@@ -16,8 +16,8 @@ class RandomAgent(base_class_bandit):
     '''
 
 
-    def __init__(self, env, q_initialisation = None, name = None):
-        super().__init__(env, q_initialisation, name) # init from base_class_bandit
+    def __init__(self, env, q_initialisation = None, valuation_method = "average", alpha = None, name = None):
+        super().__init__(env, q_initialisation, valuation_method, alpha, name) # init from base_class_bandit
 
     def select_action(self):
         a = super().random_action()
@@ -38,9 +38,9 @@ class EpsilonGreedyAgent(base_class_bandit):
 
     '''
 
-    def __init__(self, env, epsilon, q_initialisation = None, name = None):
+    def __init__(self, env, epsilon, q_initialisation = None, valuation_method = "average", alpha = None, name = None):
         self.epsilon = epsilon
-        super().__init__(env, q_initialisation, name) # init from base_class_bandit
+        super().__init__(env, q_initialisation, valuation_method, alpha, name) # init from base_class_bandit
 
     def select_action(self):
 

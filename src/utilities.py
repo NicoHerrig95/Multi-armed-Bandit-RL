@@ -1,5 +1,7 @@
 ##### UTILITIES #####
 import numpy as np
+import gym
+from gym import spaces
 import matplotlib.pyplot as plt
 
 
@@ -30,8 +32,9 @@ class Action(object):
         self.n = 0
 
 
-
-
+##################################################################################################
+##################################### -- BASE CLASSES -- #########################################
+##################################################################################################
 
 class base_class_bandit(object):
     '''
@@ -41,25 +44,51 @@ class base_class_bandit(object):
     ----------
     env: Bandit environment
     q_initialisation: initial q-estimates. Type -> int, float, complex, NoneType
+    valuation_method: Value-estimation method used for calculating Q-estimates. Must be one of ["average", "weighted"]
+    alpha: Requried when method == "weighted". Scales the weighting for the last reward. 
+           Must be within [0,1]. Type -> [int, float, complex]
     '''
 
-    def __init__(self, env, q_initialisation = None, name = None):
+    def __init__(self, env, q_initialisation = None, valuation_method = "average", alpha = None, name = None):
 
     # list of actions the agent can take.
     # is element of [0, k-1]
-        self.actions = [] 
+        
         self.k = env.k
 
+        # ALPHA
+        if not isinstance(alpha, (float, int, complex)) or alpha < 0 or alpha > 1:
+            raise ValueError("alpha must be of type [int, float, complex] and in [0, 1]")
+        self.alpha = alpha 
+
+        # NAME
         if name != None:
             if not isinstance(name, str):
                 raise ValueError("name must be of type [string]")
         self.name = name
 
+        # VALUATION METHOD
+        valuation_method_options = ["average", "weighted"]
+        # checking if method is element of possible options
+        if valuation_method not in valuation_method_options:
+             raise ValueError("value for method must be one of: {}".format(valuation_method_options))
+        self.method = valuation_method
 
+        # check for method == "weighted"
+        if valuation_method == "weighted":
+            if not isinstance(alpha, (int, float, complex)):
+                raise ValueError("for weighted method, alpha must be of Type [int, float, complex]")
+            if alpha > 1 or alpha < 0:
+                raise ValueError("alpha must be [0, 1]") 
+
+        # Q INITIALISATION
         if q_initialisation != None and not isinstance(initial_value, (int, float, complex)):
             raise ValueError("q_initialisation must be of types: [list, int, float, complex, NoneType]")
         self.initial_value = q_initialisation
 
+        # ACTIONS 
+        # generating list of action objects
+        self.actions = [] 
         for _ in range(self.k): 
             self.actions.append(Action(initial_value = self.initial_value))
 
@@ -96,7 +125,7 @@ class base_class_bandit(object):
         return a
 
 
-    def update_estimates(self, reward, action, method = "average", alpha = None):
+    def update_estimates(self, reward, action):
         '''
         Updates the Q-estimates based on the received reward and the action taken.
 
@@ -104,33 +133,17 @@ class base_class_bandit(object):
         ----------
         reward: Reward received from the environment.
         action: Action taken for receiving the reward.
-        method: Value-estimation method used for calculating Q-estimates. Must be one of ["average", "weighted"]
-        alpha: Requried when method == "weighted". Scales the weighting for the last reward. 
-               Must be within [0,1]. Type -> [int, float, complex]
         '''
-
-        method_options = ["average", "weighted"]
-        # checking if method is element of possible options
-        if method not in method_options:
-             raise ValueError("value for method must be one of: {}".format(method_options))
-
-        # check for method == "weighted"
-        if method == "weighted":
-            if not isinstance(alpha, (int, float, complex)):
-                raise ValueError("for weighted method, alpha must be of Type [int, float, complex]")
-            if alpha > 1 or alpha < 0:
-                raise ValueError("alpha must be [0, 1]") 
-
 
         # update action counter
         self.actions[action].n += 1 
 
-        if method == "average":
+        if self.method == "average":
             # Method: average value estimation
             self.actions[action].q = self.actions[action].q + (1/self.actions[action].n) * (reward - self.actions[action].q)
 
-        if method == "weighted":
-            self.actions[action].q = self.actions[action].q + alpha * (reward - self.actions[action].q)
+        if self.method == "weighted":
+            self.actions[action].q = self.actions[action].q + self.alpha * (reward - self.actions[action].q)
 
 
     def statistics(self):
@@ -161,166 +174,31 @@ class base_class_bandit(object):
 
 
 
+class base_bandit_env(gym.Env):
 
-
-##### Evaluation Class ##### 
-class Multiarmed_Bandit(object):
-    '''
-    Multiarmed Bandit object. 
-    Requires a bandit environment and a bandit agent as input.
-    
-    Arguments:
-    ----------
-    environment: An initialised bandit environment 
-    agent: An initialised bandit agent
-    '''
-
-    def __init__(
-        self, 
-        environment, 
-        agent):
-
-        self.agent = agent
-        self.env = environment
-
-        # getting variables from agent and environment
-        self.env_mu = environment.mu
-        self.k = environment.k
+    def __init__(self, size):
         
-
-    def execute(self, episodes, value_estimation = "average"):
-        '''
-        Executes the Multiarmed Bandit. 
-
-        Arguments:
-        ----------
-        episodes: Number of episodes the agent is trained on the environment. Type -> [int]
-        value_estimation: Method for q-value estimation. Must be one of ["average", "weighted"]
-        '''
-
-        # requires calling following functions from agent:
-        # agent.step()
-        # agent.select_action()
-        # agent.update_estimates()
-
-        if not isinstance(episodes, int):
-            raise ValueError("episodes must be of type int")
-
-        value_estimation_options = ["average", "weighted"]
-        if value_estimation not in value_estimation_options:
-             raise ValueError("value_estimation must be one of: {}".format(value_estimation_options))
-
-        # storers
-        rewards = []
-        avg_rewards = []
-        regrets = []
-        avg_regrets =[]
-        avg_reward = 0
-        avg_regret = 0
-        n = 0 # counter
-
-        for _ in range(episodes):
-
-            n += 1 # episode count update
-
-            a = self.agent.select_action()
-            reward, regret = self.env.step(action = a)
-            print("action:", a, "reward: ", reward, "regret:", regret)
-            # update q-estimates
-            self.agent.update_estimates(reward = reward, action=a, method = value_estimation)
+        # defining size of environment
+        if not isinstance(size, int): 
+            raise ValueError("size must be of type [int]")
+        self.k = size
 
 
-            rewards.append(reward)
-            regrets.append(regret)
-            avg_reward = avg_reward + (1/n) * (reward - avg_reward)
-            avg_rewards.append(avg_reward)
-            avg_regret = avg_regret + (1/n) * (regret - avg_regret)
-            avg_regrets.append(avg_regret)
+        # environment spaces
+        self.action_space = spaces.Discrete(self.k)
+        self.observation_space = spaces.Discrete(1)
+
+    
+
+    def step(self, action):
+        # To be overwritten by specific bandit implementation
+        pass
+
+    def reset(self):
+        # To be overwritten by specific bandit implementation
+        return 0
+
+    def render(self, mode='human', close=False):
+        pass
 
 
-        # results object for further usage
-        self.results = {
-            "rewards" : rewards,
-            "regrets" : regrets,
-            "avg rewards": avg_rewards,
-            "avg regrets": avg_regrets
-        }
-
-
-
-    ##### VISUALISATION FUNCTIONS #####
-    def average_rewards(self, plot = False):
-        '''
-        Returns either a list or a plot of average rewards over time.
-
-        Arguments:
-        ----------
-        plot: Indicates whether or not average rewards are plotted. Type -> bool
-        '''
-
-        if not isinstance(plot, bool):
-            raise ValueError("plot must be one of [True, False]")
-
-        if plot == False: 
-            return self.results['avg rewards']
-        else: 
-            # working on plot
-            plt.plot(self.results['avg rewards'])
-            plt.show()
-
-    def average_regrets(self, plot = False):
-        '''
-        Returns either a list or a plot of average regrets over time.
-
-        Arguments:
-        ----------
-        plot: Indicates whether or not average rewards are plotted. Type -> bool
-        '''
-
-        if not isinstance(plot, bool):
-            raise ValueError("plot must be one of [True, False]")
-
-        if plot == False: 
-            return self.results['avg regrets']
-        else:
-            plt.plot(self.results['avg regrets'])
-            plt.show()
-
-
-    def selected_actions(self, plot = False):
-        '''
-        Returns either a list or a plot of selected action for current bandit execution.
-
-        Arguments:
-        ----------
-        plot: Indicates whether or not average rewards are plotted. Type -> bool
-        '''
-
-        if not isinstance(plot, bool):
-            raise ValueError("plot must be one of [True, False]")
-
-
-        counts = self.agent.statistics()['action counts']
-
-        if plot == False: 
-            return counts
-
-        if plot == True:
-
-            fig, ax = plt.subplots()
-            actions = [str(i+1) for i in (list(range(len(counts))))]
-            ax.bar(actions, counts)
-
-            ax.set_ylabel('total count')
-            ax.set_xlabel("action")
-            ax.set_title('action counts')
-            plt.show()
-
-
-
-    def return_agent(self):
-        ''' 
-        Returns the agent of the Bandit object.
-        '''
-
-        return self.agent
