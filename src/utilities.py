@@ -56,10 +56,7 @@ class base_class_bandit(object):
         
         self.k = env.k
 
-        # ALPHA
-        if not isinstance(alpha, (float, int, complex)) or alpha < 0 or alpha > 1:
-            raise ValueError("alpha must be of type [int, float, complex] and in [0, 1]")
-        self.alpha = alpha 
+        
 
         # NAME
         if name != None:
@@ -76,10 +73,12 @@ class base_class_bandit(object):
 
         # check for method == "weighted"
         if valuation_method == "weighted":
+            # ALPHA
             if not isinstance(alpha, (int, float, complex)):
                 raise ValueError("for weighted method, alpha must be of Type [int, float, complex]")
             if alpha > 1 or alpha < 0:
                 raise ValueError("alpha must be [0, 1]") 
+            self.alpha = alpha 
 
         # Q INITIALISATION
         if q_initialisation != None and not isinstance(initial_value, (int, float, complex)):
