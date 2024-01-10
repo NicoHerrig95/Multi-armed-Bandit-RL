@@ -1,5 +1,5 @@
 # Multi-armed bandit environment and algorithms
-> Python code library, containing reinforcement learning environment implementations of multiarmed bandit problems, as well as agents from the current literature to solve the problem. The repository further contains base classes for both the bandit environment (based on the environment class from OpenAI gym) and the agent, enabling users to easily build their own environment and agent.
+> Python code library, containing reinforcement learning environment implementations of multiarmed bandit problems, as well as agents from the current literature to solve the problem. The repository further contains base classes for both the bandit environment (based on the `Env` class from OpenAI gym) and the agent, enabling users to easily build their own environment and agent.
 > The scope of this project is to provide a comprehensive but easy-to-use environment for stochastic analysis of the problem.
 > **Please note that this a working project**
 
@@ -37,27 +37,26 @@ When initialising the environment, the expected rewards for each action $q_(a)*$
 `reward_distribution`: defines the theoretical distribution of rewards. Options: `["gaussian", "lognormal"]`.\
 `stochastic_moments`: Defines the first and second moment of the normal distribution the expected rewards $q_*(1),...,q_*(k)$ are sampled from ($\mu=0$ and $\sigma=1$ by default).\
 \
-*Example of a 5-armed bandit:* If the environment is initialised with `stochastic_moments = [1,2]`, the expected returns for each of the 5 reward distributions $q_*(1),...,q_*(5)$ are random variables from a normal distribution with $\mu = 1$ and $\sigma = 2$ ($N(1,2)$). After the initialisation, let $q_*(5) = 0.2*$. Subsequently, $R_{t,5} \sim \mathcal{N}(0.2,1)$ in case of normally distributed rewards ($\sim \mathcal{logN}(0.2,1)$ applies if the user chose the log-normal distribution).  
+*Example of a 5-armed bandit:* If the environment is initialised with `stochastic_moments = [1,2]`, the expected returns for each of the 5 reward distributions $q_*(1),...,q_*(5)$ are random variables from a normal distribution with $\mu = 1$ and $\sigma = 2$ ($N(1,2)$). After the initialisation, let $q_*(5) = 0.2$. Subsequently, $R_{t,5} \sim \mathcal{N}(0.2,1)$ in case of normally distributed rewards ($\sim \mathcal{logN}(0.2,1)$ applies if the user chose the log-normal distribution).  
 
 
 
 
 ## Setup
-1. Import the module via `pip install git+https://github.com/NicoHerrig95/Multi-armed-Bandit-RL.git`
+**The library will be available via pip once finalised.**
 
 
 ## Usage
-How does one go about using it?
-Provide various use cases and code examples here.
+1. Initialising the environment\
 
-`write-your-code-here`
+`write-your`\
+`-code-here`
 
 
 ## Project Status
 Project is: *in progress* 
 
 
-## Upcoming
 
 
 ## Acknowledgements
