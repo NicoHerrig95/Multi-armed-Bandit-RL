@@ -1,7 +1,7 @@
 import numpy as np
 import gym
 from gym import spaces
-from utilities import * 
+from src.utilities import * 
 
 
 
@@ -152,9 +152,8 @@ class adversarial_bandit_rw(base_bandit_env):
             raise ValueError("input for stochastic moments must be of lenght 2 (covering first and second moment)")
 
         # initialising stochastic moments
-        self.mu = np.random.normal(stochastic_moments[0], 1, size=size) # central moments for rewards follow Norm(mu, 1)
-        self.sigma = stochastic_moments[1] # std. dev of all reward distributions is sigma
-        
+        self.mu = np.random.normal(stochastic_moments[0], stochastic_moments[1], size=size)
+       
         # increment for random walks. 
         self.rw_increment = np.zeros(size) 
         # init from base environment class
@@ -167,11 +166,12 @@ class adversarial_bandit_rw(base_bandit_env):
         reward = 0
         done = True
 
+        # new 
         if self.reward_distribution == "gaussian":
-            reward = np.random.normal(self.mu[action], self.sigma) + self.rw_increment[action]
+            reward = np.random.normal(self.mu[action], 1) + self.rw_increment[action]
 
         if self.reward_distribution == "lognormal":
-            reward = np.random.lognormal(mean = self.mu[action], sigma = self.sigma) + self.rw_increment[action]
+            reward = np.random.lognormal(mean = self.mu[action], sigma = 1) + self.rw_increment[action]
 
         regret = max(self.mu) - reward
 

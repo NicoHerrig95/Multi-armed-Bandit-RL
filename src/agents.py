@@ -1,4 +1,4 @@
-from utilities import *
+from src.utilities import *
 import numpy as np 
 
 
@@ -70,7 +70,7 @@ class UCBAgent(base_class_bandit):
 
 
 
-    def __init__(self, env, c, name = None):
+    def __init__(self, env, c, q_initialisation = None, valuation_method = "average", alpha = None, name = None):
 
         if not isinstance(c, (int, float, complex)):
             raise ValueError("c must be one of type [int, float, complex]")
@@ -80,7 +80,7 @@ class UCBAgent(base_class_bandit):
         self.c = c
 
         self.t = 0 
-        super().__init__(env, name)
+        super().__init__(env, q_initialisation, valuation_method, alpha, name)
 
 
     def select_action(self):

@@ -160,6 +160,15 @@ class Multiarmed_Bandit(object):
             plt.show()
 
 
+    def total_results(self):
+        ''' 
+        Returns the total results.
+        '''
+        print(f'total rewards: {sum(self.results["rewards"])}')
+        print(f'total regret: {sum(self.results["regrets"])}')
+
+
+
 
     def return_agent(self):
         ''' 

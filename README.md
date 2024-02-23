@@ -8,7 +8,6 @@
 * [Setup](#setup)
 * [Usage](#usage)
 * [Project Status](#project-status)
-* [Upcoming](#room-for-improvement)
 * [Acknowledgements](#acknowledgements)
 <!-- * [License](#license) -->
 

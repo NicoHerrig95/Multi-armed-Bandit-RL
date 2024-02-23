@@ -1,2 +1,5 @@
 virt_env/
 notes.txt
+test/
+Basic_info_Bandits.md
+__pycache__
