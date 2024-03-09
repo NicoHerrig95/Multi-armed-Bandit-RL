@@ -77,8 +77,5 @@ bandit.average_rewards(plot=True)
 
 
 ## Acknowledgements
-Give credit here.
-- This project was inspired by...
-- This project was based on [this tutorial](https://www.example.com).
-- Many thanks to...
+Credits to Richard S. Sutton and Andrew G. Barto (2018). Book: [Amazon-Link](https://www.amazon.de/-/en/Richard-S-Sutton/dp/0262039249/ref=sr_1_1?crid=1XHYMM96E466H&dib=eyJ2IjoiMSJ9.MVBhGDC2mDNtCrGRLs9ttAdjPmpi5wI8sY3XAIzI1Gmlioi8beByH4BrWHnz8C7G-tPZT50G23ly8B4UBFscgFzY2s17CUKnS4qVQY__rePu64Mh6cmqXHEf_lEY15FYgaUqjJYj5xTJXMOwtsjYMibl2il_V4xzwNq-O9BXHsaK2cVQeK-sTkfJpHIv4c9uStfs4_sZM7mIYEOttzG-cHLH3t8H7xqR2qo2OLJ8ewQ.IXuijPvrVFmPCMvoHK2nx5kOamz0W3xCr6Tk0dLkWxM&dib_tag=se&keywords=reinforcement+learning&qid=1709999088&sprefix=Reinfor%2Caps%2C122&sr=8-1)
 
