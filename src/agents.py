@@ -98,10 +98,4 @@ class UCBAgent(base_class_bandit):
         a = np.argmax(UCB_table)
 
         return a 
-
-
-        
-        
-
-        
         
