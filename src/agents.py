@@ -5,15 +5,16 @@ import numpy as np
 
 
 class RandomAgent(base_class_bandit):
-    '''
-    Bandit Agent, selects actions on random
+    """Random Agent, selects actions on random
 
     Arguments
     ---------
     env: Bandit environment
     q_initialisation: initial q-estimates. Type -> int, float, complex, NoneType
-
-    '''
+    valuation_method
+    alpha
+    name
+    """
 
 
     def __init__(self, env, q_initialisation = None, valuation_method = "average", alpha = None, name = None):
@@ -28,16 +29,17 @@ class RandomAgent(base_class_bandit):
 
 
 class EpsilonGreedyAgent(base_class_bandit):
-    '''
-    Bandit Agent, uses epsilon-greedy method for action selection.
+    """Epsilon-Greedy Agent
 
     Arguments
     ---------
     env: Bandit environment
     epsilon: epsilon value, where P(action = greedy) = 1 - epsilon. Type -> int, float, complex. Range -> [0,1]
     q_initialisation: initial q-estimates. Type -> int, float, complex, NoneType
-
-    '''
+    valuation_method
+    alpha
+    name
+    """
 
     def __init__(self, env, epsilon, q_initialisation = None, valuation_method = "average", alpha = None, name = None):
 
@@ -67,7 +69,17 @@ class EpsilonGreedyAgent(base_class_bandit):
 
 
 class UCBAgent(base_class_bandit):
+    """UCB Agent
 
+    Arguments
+    ---------
+    env: Bandit environment
+    epsilon: epsilon value, where P(action = greedy) = 1 - epsilon. Type -> int, float, complex. Range -> [0,1]
+    q_initialisation: initial q-estimates. Type -> int, float, complex, NoneType
+    valuation_method
+    alpha
+    name
+    """
 
 
     def __init__(self, env, c, q_initialisation = None, valuation_method = "average", alpha = None, name = None):
