@@ -20,6 +20,20 @@ The repository currently is only available via git. To clone the repository, ple
 ```sh
 git clone https://github.com/NicoHerrig95/Multi-armed-Bandit-RL.git
 ```
+Then, create and activate a virtual environment.  
+```sh
+# virtual environment with name virt_env
+python3 -m venv virt_env
+# following line is for MacOS/Linux users
+source virt_env/bin/activate
+# ALTERNATIVE for windows
+virt_env/Scripts/activate
+```
+Install dependencies via requirments.txt
+```sh
+pip install -r requirements.txt
+```
+-> Setup is now finished.
 
 
 ## Usage
