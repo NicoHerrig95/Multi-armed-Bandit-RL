@@ -71,7 +71,7 @@ bandit = Multiarmed_Bandit(environment=env, agent=agent)
 # defining how much iterations the algorithm shall run
 n_episodes = 1000 
 # execution
-bandit_1.execute(episodes=n_episodes) 
+bandit.execute(episodes=n_episodes) 
 ```
 
 **4. Results -> running analytics**
